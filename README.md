@@ -25,51 +25,47 @@ flowchart LR
 
 Node.js 20.9 以上が必要です。DB は Vercel から作るので、先に Vercel に公開します。
 
-1. このフォルダを自分の GitHub のリポジトリに送り、Vercel に公開します（Add New → Project → Deploy）。この時点では DB がないので、一覧には「通信に失敗しました（500）」と出ます
-2. Vercel のプロジェクトの Storage → Create Database → Neon を選び、DB を作ってこのプロジェクトにつなぎます。環境変数 `DATABASE_URL` が自動で入ります
-3. 手元にも `DATABASE_URL` を持ってきます
+1. このフォルダを自分の GitHub のリポジトリに送り、Vercel に公開します（Add New → Project → Import Git Repository の一覧から Import → Deploy）。この時点では DB がないので、一覧には「通信に失敗しました（500）」と出ます
+2. Vercel のプロジェクトの左のメニューの Storage → Create Database → Neon を選び、DB を作ってこのプロジェクトにつなぎます。Auth はオフ、Connect a Project の画面の Custom Prefix は `DATABASE` にします。環境変数 `DATABASE_URL` が自動で入ります
+3. 手元にも `DATABASE_URL` を持ってきます。DB の画面の Quickstart で `.env.local` のタブを選び、Show secret → Copy Snippet を押してから、このフォルダで次を打ちます
+
+```bash
+pbpaste > .env.local
+```
+
+4. DB に表を作り、`data/shelters.json` の14件を入れます
 
 ```bash
 npm install
 ```
 
 ```bash
-npx vercel login
-```
-
-```bash
-npx vercel link
-```
-
-```bash
-npx vercel env pull .env.local
-```
-
-4. DB に表を作り、`data/shelters.json` の14件を入れます
-
-```bash
 npm run db:seed
 ```
 
-「shelters の表に 14 件あります。」と出れば完了です。
+「shelters の表に 14 件あります。」と出れば完了です。DB の画面の Data Editor で、14行の表が見られます。
 
-5. 手元で動かします
+5. 公開し直します。環境変数は、足したあとの公開から使われるためです。Deployments のいちばん上の行の「…」から Redeploy を押すと、公開先に一覧が出ます
+
+6. 手元で動かします
 
 ```bash
 npm run dev
 ```
 
-ブラウザで http://localhost:3000 を開きます。Vercel の公開先も、再読み込みすれば一覧が出ます（同じ DB を見ているため）。
+ブラウザで http://localhost:3000 を開きます。公開先と同じ一覧が出ます（同じ DB を見ているため）。
 
 ## DB から読んでいるかを確かめる
 
-Vercel の Storage から DB を開き、Open in Neon → SQL Editor で次の1行を動かします。
+DB の画面の Data Editor で `shelters` の表を開き、id が `sample-001` の行の name を「サンプル第一小学校（DBから）」に書き換えて保存します。
+
+手元と公開先のどちらも、再読み込みで名前が変わります。公開し直していないのに変わるのは、データがコードと別の場所（DB）にあるためです。戻すときは、同じように書き換えるか、`npm run db:seed` をもう一度動かします。
+
+SQL で直すときは、DB の画面の Query で右上の Read-only をオフにしてから、次の1行を Run します。
 
 ```sql
 UPDATE shelters SET name = 'サンプル第一小学校（DBから）' WHERE id = 'sample-001';
 ```
-
-手元と公開先のどちらも、再読み込みで名前が変わります。公開し直していないのに変わるのは、データがコードと別の場所（DB）にあるためです。戻すときは、名前を元に戻す `UPDATE` を動かすか、`npm run db:seed` をもう一度動かします。
 
 ## APIを見てみる
 
